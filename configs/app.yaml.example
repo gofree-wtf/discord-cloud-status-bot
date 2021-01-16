@@ -1,0 +1,7 @@
+log:
+  level: debug
+  format: console
+  session_level: warn
+bot:
+  token: "INSERT_HERE"
+  command_prefix: "!cs"
