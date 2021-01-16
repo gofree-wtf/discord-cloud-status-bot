@@ -9,11 +9,9 @@ import (
 	"strings"
 )
 
-const defaultBotCommandPrefix = "!cs"
+const DefaultBotCommandPrefix = "!cs"
 
-var Logger = log.With().Caller().Logger()
-
-type Config struct {
+type _Config struct {
 	Log Log `yaml:"log"`
 	Bot Bot `yaml:"bot"`
 }
@@ -29,63 +27,37 @@ type Bot struct {
 	CommandPrefix string `yaml:"command_prefix"`
 }
 
-func ParseConfigFile(path string) (*Config, error) {
-	c := &Config{
-		// default values
-		Log: Log{
-			Level:        "info",
-			Format:       "console",
-			SessionLevel: "warn",
-		},
-		Bot: Bot{
-			CommandPrefix: defaultBotCommandPrefix,
-		},
-	}
-
-	// parse config file
-	file, err := ioutil.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-
-	err = yaml.Unmarshal(file, c)
-	if err != nil {
-		return nil, err
-	}
-
-	// config log module
-	err = c.setLogLevel()
-	if err != nil {
-		return nil, err
-	}
-
-	err = c.setLogFormatter()
-	if err != nil {
-		return nil, err
-	}
-
-	// validate values
-	err = c.validateBotValues()
-	if err != nil {
-		return nil, err
-	}
-
-	return c, nil
+var Config = &_Config{
+	// default values
+	Log: Log{
+		Level:        "info",
+		Format:       "console",
+		SessionLevel: "warn",
+	},
+	Bot: Bot{
+		CommandPrefix: DefaultBotCommandPrefix,
+	},
 }
 
-func (c *Config) setLogLevel() error {
-	lv, err := zerolog.ParseLevel(c.Log.Level)
+var Logger = log.With().Caller().Logger()
+
+func init() {
+	err := setLogger()
 	if err != nil {
-		Logger.Error().Err(err).Str("log.level", c.Log.Level).Msg("failed to parse log level")
+		Logger.Error().Err(err).Msg("failed to set logger")
+	}
+}
+
+func setLogger() error {
+	lv, err := zerolog.ParseLevel(Config.Log.Level)
+	if err != nil {
+		Logger.Error().Err(err).Str("log.level", Config.Log.Level).Msg("failed to parse log level")
 		return err
 	}
 
 	zerolog.SetGlobalLevel(lv)
-	return nil
-}
 
-func (c *Config) setLogFormatter() error {
-	switch c.Log.Format {
+	switch Config.Log.Format {
 	case "console":
 		Logger = Logger.Output(zerolog.NewConsoleWriter())
 		return nil
@@ -93,15 +65,33 @@ func (c *Config) setLogFormatter() error {
 		// use default json formatter
 		return nil
 	default:
-		return fmt.Errorf("invalid log.format: %s", c.Log.Format)
+		return fmt.Errorf("invalid log.format: %s", Config.Log.Format)
 	}
 }
 
-func (c *Config) validateBotValues() error {
-	if c.Bot.Token == "" {
-		return fmt.Errorf("set your bot.token")
+func ParseConfigFile(path string) error {
+	// parse config file
+	file, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
 	}
 
-	c.Bot.CommandPrefix = strings.Trim(c.Bot.CommandPrefix, " ")
+	err = yaml.Unmarshal(file, Config)
+	if err != nil {
+		return err
+	}
+
+	// config log module
+	err = setLogger()
+	if err != nil {
+		return err
+	}
+
+	// validate values
+	if Config.Bot.Token == "" {
+		return fmt.Errorf("set your bot.token")
+	}
+	Config.Bot.CommandPrefix = strings.Trim(Config.Bot.CommandPrefix, " ")
+
 	return nil
 }

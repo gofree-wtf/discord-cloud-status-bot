@@ -8,7 +8,7 @@ run:
 	go run cmd/bot.go
 
 test:
-	go test ./pkg/...
+	go test -v ./pkg/...
 
 docker-build:
 	docker build -t discord-cloud-status-bot:latest .

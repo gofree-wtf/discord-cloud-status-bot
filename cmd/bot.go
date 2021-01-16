@@ -20,14 +20,14 @@ func main() {
 	Logger.Info().Str("-config.file", configFile).Msg("")
 
 	// parse config file
-	config, err := ParseConfigFile(configFile)
+	err := ParseConfigFile(configFile)
 	if err != nil {
 		Logger.Fatal().Err(err).Str("config.file", configFile).Msg("failed to parse config file")
 	}
-	Logger.Debug().Interface("config", config).Msg("")
+	Logger.Debug().Interface("config", Config).Msg("")
 
 	// run bot controller
-	ctrl, err := pkg.NewBotController(config.Bot.Token, config.Bot.CommandPrefix, config.Log.SessionLevel)
+	ctrl, err := pkg.NewBotController(Config.Bot.Token, Config.Bot.CommandPrefix, Config.Log.SessionLevel)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to create controller")
 	}

@@ -3,14 +3,13 @@ package pkg
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"github.com/gofree-wtf/discord-cloud-status-bot/pkg/command"
 	. "github.com/gofree-wtf/discord-cloud-status-bot/pkg/common"
 	"github.com/gofree-wtf/discord-cloud-status-bot/pkg/util"
 	"strings"
 )
 
 func (c *BotController) handleMessage(session *discordgo.Session, createMsg *discordgo.MessageCreate) {
-	Logger.Debug().Interface("createMsg", createMsg).Msg("")
-
 	if createMsg.Author.ID == session.State.User.ID {
 		// ignore bot self message
 		return
@@ -19,13 +18,23 @@ func (c *BotController) handleMessage(session *discordgo.Session, createMsg *dis
 		return
 	}
 
-	command := util.SubstringAfter(createMsg.Content, c.commandPrefix+" ")
-	Logger.Info().Str("command", command).Msg("received command")
+	Logger.Debug().Interface("createMsg", createMsg).Msg("")
 
-	// TODO handle command
-	sendContent := fmt.Sprintf("I got it. %s command !", command)
-	_, err := session.ChannelMessageSend(createMsg.ChannelID, sendContent)
+	inMsg := util.SubstringAfter(createMsg.Content, c.commandPrefix+" ")
+	Logger.Info().Str("inMsg", inMsg).Msg("received message")
+
+	cmd := command.NewBotCommand(c.commandPrefix)
+
+	outMsg, errMsg, err := cmd.Execute(inMsg)
+	sendMsg := fmt.Sprintf("%s\n%s", outMsg, errMsg)
 	if err != nil {
-		Logger.Error().Err(err).Str("content", sendContent).Msg("failed to send message")
+		sendMsg = fmt.Sprintf("무언가 문제가 발생하였습니다.\n%s\nError: %s", sendMsg, err.Error())
+	}
+
+	Logger.Debug().Str("sendMsg", sendMsg).Msg("")
+
+	_, err = session.ChannelMessageSend(createMsg.ChannelID, sendMsg)
+	if err != nil {
+		Logger.Error().Err(err).Str("sendMsg", sendMsg).Msg("failed to send message")
 	}
 }
