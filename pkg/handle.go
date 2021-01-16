@@ -26,11 +26,17 @@ func (c *BotController) handleMessage(session *discordgo.Session, createMsg *dis
 	cmd := command.NewBotCommand(c.commandPrefix)
 
 	outMsg, errMsg, err := cmd.Execute(inMsg)
-	sendMsg := fmt.Sprintf("%s\n%s", outMsg, errMsg)
-	if err != nil {
-		sendMsg = fmt.Sprintf("무언가 문제가 발생하였습니다.\n%s\nError: %s", sendMsg, err.Error())
-	}
 
+	var sendMsg string
+	if err != nil {
+		if errMsg != "" {
+			sendMsg = fmt.Sprintf("무언가 문제가 발생하였습니다.\n%s", errMsg)
+		} else {
+			sendMsg = fmt.Sprintf("무언가 문제가 발생하였습니다.\nError: %s", err.Error())
+		}
+	} else {
+		sendMsg = outMsg
+	}
 	Logger.Debug().Str("sendMsg", sendMsg).Msg("")
 
 	_, err = session.ChannelMessageSend(createMsg.ChannelID, sendMsg)

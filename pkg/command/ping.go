@@ -15,7 +15,7 @@ const (
 func pingCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:   pingCmd,
-		Short: "pong 메세지를 줍니다. 테스트 목적으로 사용할 수 있습니다.",
+		Short: "간단한 응답 메세지를 줍니다. 테스트 목적으로 사용할 수 있습니다.",
 		Run: func(cmd *cobra.Command, args []string) {
 			outMsg := pingOutMsgPrefix
 			if len(args) > 0 {
