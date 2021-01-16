@@ -44,7 +44,7 @@ $ make docker-run
 
 https://discord.com/oauth2/authorize?client_id=INSERT_HERE&scope=bot&permissions=19456
 
-### Step 4. 채널에 메세지 보내보기
+### Step 5. 채널에 메세지 보내보기
 
 Example: `!cs test`
 
