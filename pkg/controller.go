@@ -40,15 +40,15 @@ func NewBotController(token, commandPrefix, sessionLogLevel string) (*BotControl
 	return c, nil
 }
 
-func (c *BotController) Run() (shutdownFn func(), err error) {
+func (c *BotController) Run() (closeFn func(), err error) {
 	stopCh := make(chan struct{}, 1)
 
 	go func() {
 		for {
-			Logger.Info().Msg("start session")
-			err := c.startSession()
+			Logger.Info().Msg("connect session")
+			err := c.connect()
 			if err != nil {
-				Logger.Error().Err(err).Msg("failed to start session. retry start session")
+				Logger.Error().Err(err).Msg("failed to connect session. retry connect session")
 				time.Sleep(sessionReconnectionPeriod)
 				continue
 			}
@@ -59,16 +59,16 @@ func (c *BotController) Run() (shutdownFn func(), err error) {
 	}()
 
 	return func() {
-		Logger.Info().Msg("waiting for stop session")
+		Logger.Info().Msg("waiting for close session")
 
 		stopCh <- struct{}{}
-		c.stopSession()
+		c.close()
 
-		Logger.Info().Msg("stopped session")
+		Logger.Info().Msg("closed session")
 	}, nil
 }
 
-func (c *BotController) startSession() error {
+func (c *BotController) connect() error {
 	session, err := discordgo.New("Bot " + c.token)
 	if err != nil {
 		return err
@@ -87,7 +87,7 @@ func (c *BotController) startSession() error {
 	return nil
 }
 
-func (c *BotController) stopSession() {
+func (c *BotController) close() {
 	if c.session == nil {
 		return
 	}

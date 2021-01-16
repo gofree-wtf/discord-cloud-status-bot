@@ -30,7 +30,17 @@ type Bot struct {
 }
 
 func ParseConfigFile(path string) (*Config, error) {
-	c := &Config{}
+	c := &Config{
+		// default values
+		Log: Log{
+			Level:        "info",
+			Format:       "console",
+			SessionLevel: "warn",
+		},
+		Bot: Bot{
+			CommandPrefix: defaultBotCommandPrefix,
+		},
+	}
 
 	// parse config file
 	file, err := ioutil.ReadFile(path)
@@ -64,11 +74,6 @@ func ParseConfigFile(path string) (*Config, error) {
 }
 
 func (c *Config) setLogLevel() error {
-	logLevel := c.Log.Level
-	if logLevel == "" {
-		logLevel = zerolog.InfoLevel.String()
-	}
-
 	lv, err := zerolog.ParseLevel(c.Log.Level)
 	if err != nil {
 		Logger.Error().Err(err).Str("log.level", c.Log.Level).Msg("failed to parse log level")
@@ -97,12 +102,6 @@ func (c *Config) validateBotValues() error {
 		return fmt.Errorf("set your bot.token")
 	}
 
-	commandPrefix := strings.Trim(c.Bot.CommandPrefix, " ")
-	if commandPrefix == "" {
-		Logger.Warn().Msgf("empty bot.command_prefix. use default '%s'", defaultBotCommandPrefix)
-		commandPrefix = defaultBotCommandPrefix
-	}
-	c.Bot.CommandPrefix = commandPrefix
-
+	c.Bot.CommandPrefix = strings.Trim(c.Bot.CommandPrefix, " ")
 	return nil
 }

@@ -32,7 +32,7 @@ func main() {
 		log.Fatal().Err(err).Msg("failed to create controller")
 	}
 
-	shutdownFn, err := ctrl.Run()
+	closeFn, err := ctrl.Run()
 	if err != nil {
 		Logger.Fatal().Err(err).Msg("failed to run controller")
 	}
@@ -41,5 +41,5 @@ func main() {
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
 	<-sc
-	shutdownFn()
+	closeFn()
 }
