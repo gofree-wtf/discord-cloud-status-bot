@@ -2,7 +2,6 @@ package command
 
 import (
 	"fmt"
-	. "github.com/gofree-wtf/discord-cloud-status-bot/pkg/common"
 	"github.com/spf13/cobra"
 	"strings"
 )
@@ -21,11 +20,7 @@ func pingCommand() *cobra.Command {
 			if len(args) > 0 {
 				outMsg = fmt.Sprintf("%s\nArgs: %s", outMsg, strings.Join(args, " "))
 			}
-
-			_, err := cmd.OutOrStdout().Write([]byte(outMsg))
-			if err != nil {
-				Logger.Error().Err(err).Str("outMsg", outMsg).Msg("failed to write out message")
-			}
+			writeOutMsg(cmd, outMsg)
 		},
 	}
 }

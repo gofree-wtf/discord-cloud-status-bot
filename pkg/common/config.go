@@ -7,6 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 	"io/ioutil"
 	"strings"
+	"time"
 )
 
 const DefaultBotCommandPrefix = "!cs"
@@ -25,6 +26,9 @@ type Log struct {
 type Bot struct {
 	Token         string `yaml:"token"`
 	CommandPrefix string `yaml:"command_prefix"`
+	TimeZone      string `yaml:"time_zone"`
+
+	Location *time.Location
 }
 
 var Config = &_Config{
@@ -36,6 +40,7 @@ var Config = &_Config{
 	},
 	Bot: Bot{
 		CommandPrefix: DefaultBotCommandPrefix,
+		TimeZone:      "Asia/Seoul",
 	},
 }
 
@@ -45,6 +50,11 @@ func init() {
 	err := setLogger()
 	if err != nil {
 		Logger.Error().Err(err).Msg("failed to set logger")
+	}
+
+	err = setBotValues()
+	if err != nil {
+		Logger.Error().Err(err).Msg("failed to set bot values")
 	}
 }
 
@@ -67,6 +77,16 @@ func setLogger() error {
 	default:
 		return fmt.Errorf("invalid log.format: %s", Config.Log.Format)
 	}
+}
+
+func setBotValues() error {
+	location, err := time.LoadLocation(Config.Bot.TimeZone)
+	if err != nil {
+		return err
+	}
+	Config.Bot.Location = location
+
+	return nil
 }
 
 func ParseConfigFile(path string) error {
@@ -92,6 +112,11 @@ func ParseConfigFile(path string) error {
 		return fmt.Errorf("set your bot.token")
 	}
 	Config.Bot.CommandPrefix = strings.Trim(Config.Bot.CommandPrefix, " ")
+
+	err = setBotValues()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

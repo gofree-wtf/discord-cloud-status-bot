@@ -5,3 +5,4 @@ log:
 bot:
   token: "INSERT_HERE"
   command_prefix: "!cs"
+  time_zone: Asia/Seoul
