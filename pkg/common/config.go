@@ -24,11 +24,11 @@ type Log struct {
 }
 
 type Bot struct {
-	Token         string `yaml:"token"`
+	Token         string `yaml:"token" json:"-"`
 	CommandPrefix string `yaml:"command_prefix"`
 	TimeZone      string `yaml:"time_zone"`
 
-	Location *time.Location
+	Location *time.Location `json:"-"`
 }
 
 var Config = &_Config{
