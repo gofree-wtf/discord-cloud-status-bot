@@ -36,7 +36,8 @@ type Bot struct {
 type Api struct {
 	Port                         uint16 `yaml:"port"                            env:"API_PORT"`
 	SelfHealthcheckEnabled       bool   `yaml:"self_healthcheck_enabled"        env:"API_SELF_HEALTHCHECK_ENABLED"`
-	SelfHealthcheckPeriodMinutes uint32 `json:"self_healthcheck_period_minutes" env:"API_SELF_HEALTHCHECK_PERIOD_MINUTES"`
+	SelfHealthcheckUrl           string `yaml:"self_healthcheck_url"            env:"API_SELF_HEALTHCHECK_URL"`
+	SelfHealthcheckPeriodMinutes uint32 `yaml:"self_healthcheck_period_minutes" env:"API_SELF_HEALTHCHECK_PERIOD_MINUTES"`
 }
 
 var Config = &_Config{

@@ -55,7 +55,7 @@ func (s *ApiServer) Run() (closeFn func()) {
 		selfHealthcheckTicker = time.NewTicker(time.Duration(Config.Api.SelfHealthcheckPeriodMinutes) * time.Minute)
 
 		healthcheck := func() {
-			resp, err := HttpClient.Get(fmt.Sprintf("http://localhost:%d", Config.Api.Port))
+			resp, err := HttpClient.Get(Config.Api.SelfHealthcheckUrl)
 			if err != nil {
 				Logger.Error().Err(err).Msg("failed to self healthcheck")
 			} else if resp.StatusCode != http.StatusOK {
@@ -67,7 +67,9 @@ func (s *ApiServer) Run() (closeFn func()) {
 		}
 
 		go func() {
-			Logger.Info().Uint32("selfHealthcheckPeriodMinutes", Config.Api.SelfHealthcheckPeriodMinutes).
+			Logger.Info().
+				Str("selfHealthcheckUrl", Config.Api.SelfHealthcheckUrl).
+				Uint32("selfHealthcheckPeriodMinutes", Config.Api.SelfHealthcheckPeriodMinutes).
 				Msg("start self healthcheck")
 
 			for range selfHealthcheckTicker.C {

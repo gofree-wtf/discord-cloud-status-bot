@@ -9,4 +9,5 @@ bot:
 api:
   port: 8080
   self_healthcheck_enabled: true
+  self_healthcheck_url: "INSERT_HERE ex) https://discord-cloud-status-bot.domain.com"
   self_healthcheck_period_minutes: 5
