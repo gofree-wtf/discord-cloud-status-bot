@@ -34,7 +34,9 @@ type Bot struct {
 }
 
 type Api struct {
-	Port uint16 `json:"port" env:"API_PORT" `
+	Port                         uint16 `yaml:"port"                            env:"API_PORT"`
+	SelfHealthcheckEnabled       bool   `yaml:"self_healthcheck_enabled"        env:"API_SELF_HEALTHCHECK_ENABLED"`
+	SelfHealthcheckPeriodMinutes uint32 `json:"self_healthcheck_period_minutes" env:"API_SELF_HEALTHCHECK_PERIOD_MINUTES"`
 }
 
 var Config = &_Config{
@@ -49,7 +51,9 @@ var Config = &_Config{
 		TimeZone:      "Asia/Seoul",
 	},
 	Api: Api{
-		Port: 8080,
+		Port:                         8080,
+		SelfHealthcheckEnabled:       true,
+		SelfHealthcheckPeriodMinutes: 5,
 	},
 }
 

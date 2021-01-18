@@ -32,14 +32,17 @@ func NewApiServer() *ApiServer {
 }
 
 func (s *ApiServer) Run() (closeFn func()) {
-	stopFlag := false
+	var (
+		running               = true
+		selfHealthcheckTicker *time.Ticker
+	)
 
 	go func() {
-		for {
+		for running {
 			Logger.Info().Uint16("port", Config.Api.Port).Msg("run api server")
 
 			err := s.server.ListenAndServe()
-			if err == http.ErrServerClosed || stopFlag {
+			if err == http.ErrServerClosed {
 				return
 			} else if err != nil {
 				Logger.Error().Err(err).Msg("failed to run api server. retry run server")
@@ -48,10 +51,36 @@ func (s *ApiServer) Run() (closeFn func()) {
 		}
 	}()
 
+	if Config.Api.SelfHealthcheckEnabled {
+		selfHealthcheckTicker = time.NewTicker(time.Duration(Config.Api.SelfHealthcheckPeriodMinutes) * time.Minute)
+
+		healthcheck := func() {
+			resp, err := HttpClient.Get(fmt.Sprintf("http://localhost:%d", Config.Api.Port))
+			if err != nil {
+				Logger.Error().Err(err).Msg("failed to self healthcheck")
+			} else if resp.StatusCode != http.StatusOK {
+				Logger.Error().Err(err).Int("responseCode", resp.StatusCode).
+					Msg("failed to self healthcheck")
+			} else {
+				Logger.Info().Msg("success to self healthcheck")
+			}
+		}
+
+		go func() {
+			Logger.Info().Uint32("selfHealthcheckPeriodMinutes", Config.Api.SelfHealthcheckPeriodMinutes).
+				Msg("start self healthcheck")
+
+			for range selfHealthcheckTicker.C {
+				healthcheck()
+			}
+		}()
+	}
+
 	return func() {
 		Logger.Info().Msg("waiting for close api server")
 
-		stopFlag = true
+		running = false
+		selfHealthcheckTicker.Stop()
 
 		defer Logger.Info().Msg("closed api server")
 

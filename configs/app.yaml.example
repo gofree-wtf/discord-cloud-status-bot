@@ -8,3 +8,5 @@ bot:
   time_zone: Asia/Seoul
 api:
   port: 8080
+  self_healthcheck_enabled: true
+  self_healthcheck_period_minutes: 5
