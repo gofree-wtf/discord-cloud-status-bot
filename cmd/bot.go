@@ -8,10 +8,17 @@ import (
 	"github.com/rs/zerolog/log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 )
 
 func main() {
+	// os environments
+	for _, e := range os.Environ() {
+		pair := strings.SplitN(e, "=", 2)
+		Logger.Info().Str(pair[0], pair[1]).Msg("os environment")
+	}
+
 	// program arguments
 	var configFile string
 
