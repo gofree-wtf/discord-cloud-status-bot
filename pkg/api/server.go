@@ -25,7 +25,7 @@ func NewApiServer() *ApiServer {
 	return &ApiServer{
 		router: r,
 		server: &http.Server{
-			Addr:    fmt.Sprintf(":%d", Config.Api.Port),
+			Addr:    fmt.Sprintf("%s:%d", Config.Api.GetHost(), Config.Api.GetPort()),
 			Handler: r,
 		},
 	}
@@ -39,7 +39,7 @@ func (s *ApiServer) Run() (closeFn func()) {
 
 	go func() {
 		for running {
-			Logger.Info().Uint16("port", Config.Api.Port).Msg("run api server")
+			Logger.Info().Uint16("port", Config.Api.GetPort()).Msg("run api server")
 
 			err := s.server.ListenAndServe()
 			if err == http.ErrServerClosed {

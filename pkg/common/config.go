@@ -13,6 +13,25 @@ import (
 
 const DefaultBotCommandPrefix = "!cs"
 
+var Logger = log.With().Caller().Logger()
+
+var Config = &_Config{
+	// default values
+	Log: Log{
+		Level:        "info",
+		Format:       "console",
+		SessionLevel: "warn",
+	},
+	Bot: Bot{
+		CommandPrefix: DefaultBotCommandPrefix,
+		TimeZone:      "Asia/Seoul",
+	},
+	Api: Api{
+		SelfHealthcheckEnabled:       true,
+		SelfHealthcheckPeriodMinutes: 5,
+	},
+}
+
 type _Config struct {
 	Log Log `yaml:"log"`
 	Bot Bot `yaml:"bot"`
@@ -38,27 +57,28 @@ type Api struct {
 	SelfHealthcheckEnabled       bool   `yaml:"self_healthcheck_enabled"        env:"API_SELF_HEALTHCHECK_ENABLED"`
 	SelfHealthcheckUrl           string `yaml:"self_healthcheck_url"            env:"API_SELF_HEALTHCHECK_URL"`
 	SelfHealthcheckPeriodMinutes uint32 `yaml:"self_healthcheck_period_minutes" env:"API_SELF_HEALTHCHECK_PERIOD_MINUTES"`
+
+	HerokuHost string `env:"YOUR_HOST"`
+	HerokuPort uint16 `env:"PORT"`
 }
 
-var Config = &_Config{
-	// default values
-	Log: Log{
-		Level:        "info",
-		Format:       "console",
-		SessionLevel: "warn",
-	},
-	Bot: Bot{
-		CommandPrefix: "!cs",
-		TimeZone:      "Asia/Seoul",
-	},
-	Api: Api{
-		Port:                         8080,
-		SelfHealthcheckEnabled:       true,
-		SelfHealthcheckPeriodMinutes: 5,
-	},
+func (a Api) GetHost() string {
+	if a.HerokuHost != "" {
+		return a.HerokuHost
+	} else {
+		return "" // default values
+	}
 }
 
-var Logger = log.With().Caller().Logger()
+func (a Api) GetPort() uint16 {
+	if a.Port != 0 {
+		return a.Port
+	} else if a.HerokuPort != 0 {
+		return a.HerokuPort
+	} else {
+		return 8080 // default values
+	}
+}
 
 func init() {
 	err := setLogger()
