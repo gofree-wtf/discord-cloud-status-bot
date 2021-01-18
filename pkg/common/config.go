@@ -2,6 +2,7 @@ package common
 
 import (
 	"fmt"
+	"github.com/Netflix/go-env"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
@@ -18,36 +19,29 @@ type _Config struct {
 }
 
 type Log struct {
-	Level        string `yaml:"level"`
-	Format       string `yaml:"format"`
-	SessionLevel string `yaml:"session_level"`
+	Level        string `yaml:"level" env:"LOG_LEVEL,default=info"`
+	Format       string `yaml:"format" env:"LOG_FORMAT,default=console"`
+	SessionLevel string `yaml:"session_level" env:"LOG_SESSION_LEVEL,default=warn"`
 }
 
 type Bot struct {
-	Token         string `yaml:"token" json:"-"`
-	CommandPrefix string `yaml:"command_prefix"`
-	TimeZone      string `yaml:"time_zone"`
+	Token         string `yaml:"token"  env:"BOT_TOKEN" json:"-"`
+	CommandPrefix string `yaml:"command_prefix" env:"BOT_COMMAND_PREFIX"`
+	TimeZone      string `yaml:"time_zone" env:"BOT_TIMEZONE,default=Asia/Seoul"`
 
 	Location *time.Location `json:"-"`
 }
 
-var Config = &_Config{
-	// default values
-	Log: Log{
-		Level:        "info",
-		Format:       "console",
-		SessionLevel: "warn",
-	},
-	Bot: Bot{
-		CommandPrefix: DefaultBotCommandPrefix,
-		TimeZone:      "Asia/Seoul",
-	},
-}
-
+var Config = &_Config{}
 var Logger = log.With().Caller().Logger()
 
 func init() {
-	err := setLogger()
+	_, err := env.UnmarshalFromEnviron(Config)
+	if err != nil {
+		Logger.Fatal().Err(err).Msg("failed to load environment")
+	}
+
+	err = setLogger()
 	if err != nil {
 		Logger.Error().Err(err).Msg("failed to set logger")
 	}
@@ -56,6 +50,36 @@ func init() {
 	if err != nil {
 		Logger.Error().Err(err).Msg("failed to set bot values")
 	}
+}
+
+func ParseConfigFile(path string) error {
+	file, err := ioutil.ReadFile(path)
+	if err != nil {
+		return err
+	}
+
+	err = yaml.Unmarshal(file, Config)
+	if err != nil {
+		return err
+	}
+
+	err = setLogger()
+	if err != nil {
+		return err
+	}
+
+	err = setBotValues()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func ValidateConfig() error {
+	if Config.Bot.Token == "" {
+		return fmt.Errorf("set your env:BOT_TOKEN or yaml:bot.token")
+	}
+	return nil
 }
 
 func setLogger() error {
@@ -80,43 +104,13 @@ func setLogger() error {
 }
 
 func setBotValues() error {
+	Config.Bot.CommandPrefix = strings.Trim(Config.Bot.CommandPrefix, " ")
+
 	location, err := time.LoadLocation(Config.Bot.TimeZone)
 	if err != nil {
 		return err
 	}
 	Config.Bot.Location = location
-
-	return nil
-}
-
-func ParseConfigFile(path string) error {
-	// parse config file
-	file, err := ioutil.ReadFile(path)
-	if err != nil {
-		return err
-	}
-
-	err = yaml.Unmarshal(file, Config)
-	if err != nil {
-		return err
-	}
-
-	// config log module
-	err = setLogger()
-	if err != nil {
-		return err
-	}
-
-	// validate values
-	if Config.Bot.Token == "" {
-		return fmt.Errorf("set your bot.token")
-	}
-	Config.Bot.CommandPrefix = strings.Trim(Config.Bot.CommandPrefix, " ")
-
-	err = setBotValues()
-	if err != nil {
-		return err
-	}
 
 	return nil
 }

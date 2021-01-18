@@ -3,6 +3,7 @@ module github.com/gofree-wtf/discord-cloud-status-bot
 go 1.15
 
 require (
+	github.com/Netflix/go-env v0.0.0-20210116210345-8f74e74141f7
 	github.com/bwmarrin/discordgo v0.22.1
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510

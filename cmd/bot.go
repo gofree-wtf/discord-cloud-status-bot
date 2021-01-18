@@ -17,14 +17,27 @@ func main() {
 	flag.StringVar(&configFile, "config.file", "./configs/app.yaml", "config file path")
 	flag.Parse()
 
-	Logger.Info().Str("-config.file", configFile).Msg("")
+	Logger.Info().Str("-config.file", configFile).Msg("program argument")
 
 	// parse config file
-	err := ParseConfigFile(configFile)
-	if err != nil {
-		Logger.Fatal().Err(err).Str("config.file", configFile).Msg("failed to parse config file")
+	_, err := os.Stat(configFile)
+	if os.IsNotExist(err) {
+		Logger.Info().Str("-config.file", configFile).Msg("not found config file. skipped")
+	} else if err != nil {
+		Logger.Fatal().Err(err).Str("-config.file", configFile).Msg("failed to check config file")
+	} else {
+		err = ParseConfigFile(configFile)
+		if err != nil {
+			Logger.Fatal().Err(err).Str("config.file", configFile).Msg("failed to parse config file")
+		}
 	}
+
 	Logger.Debug().Interface("config", Config).Msg("")
+
+	err = ValidateConfig()
+	if err != nil {
+		Logger.Fatal().Err(err).Interface("config", Config).Msg("failed to validate config")
+	}
 
 	// run bot controller
 	ctrl, err := pkg.NewBotController(Config.Bot.Token, Config.Bot.CommandPrefix, Config.Log.SessionLevel)
