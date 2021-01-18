@@ -1,6 +1,14 @@
 FROM golang:1.15
 LABEL maintainer="gofree.wtf@gmail.com"
 
+ENV LOG_LEVEL=info
+ENV LOG_FORMAT=console
+ENV LOG_SESSION_LEVEL=warn
+
+ENV BOT_TOKEN=INSERT_HERE
+ENV BOT_COMMAND_PREFIX=!cs
+ENV BOT_TIMEZONE=Asia/Seoul
+
 WORKDIR /discord-cloud-status-bot
 
 ADD . /discord-cloud-status-bot/
