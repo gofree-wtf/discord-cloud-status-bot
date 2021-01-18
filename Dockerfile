@@ -9,6 +9,8 @@ ENV BOT_TOKEN=INSERT_HERE
 ENV BOT_COMMAND_PREFIX=!cs
 ENV BOT_TIMEZONE=Asia/Seoul
 
+ENV API_PORT=8080
+
 WORKDIR /discord-cloud-status-bot
 
 ADD . /discord-cloud-status-bot/

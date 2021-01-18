@@ -16,6 +16,7 @@ const DefaultBotCommandPrefix = "!cs"
 type _Config struct {
 	Log Log `yaml:"log"`
 	Bot Bot `yaml:"bot"`
+	Api Api `yaml:"api"`
 }
 
 type Log struct {
@@ -32,6 +33,10 @@ type Bot struct {
 	Location *time.Location `json:"-"`
 }
 
+type Api struct {
+	Port uint16 `json:"port" env:"API_PORT" `
+}
+
 var Config = &_Config{
 	// default values
 	Log: Log{
@@ -42,6 +47,9 @@ var Config = &_Config{
 	Bot: Bot{
 		CommandPrefix: "!cs",
 		TimeZone:      "Asia/Seoul",
+	},
+	Api: Api{
+		Port: 8080,
 	},
 }
 

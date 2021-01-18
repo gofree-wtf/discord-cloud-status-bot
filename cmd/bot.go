@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/gofree-wtf/discord-cloud-status-bot/pkg"
+	"github.com/gofree-wtf/discord-cloud-status-bot/pkg/api"
 	. "github.com/gofree-wtf/discord-cloud-status-bot/pkg/common"
 	"github.com/rs/zerolog/log"
 	"os"
@@ -32,15 +33,18 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to create controller")
 	}
+	ctrlCloseFn := ctrl.Run()
 
-	closeFn, err := ctrl.Run()
-	if err != nil {
-		Logger.Fatal().Err(err).Msg("failed to run controller")
-	}
+	// run api server
+	apiServer := api.NewApiServer()
+	apiServerCloseFn := apiServer.Run()
 
 	// handle os signal
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
 	<-sc
-	closeFn()
+
+	// graceful shutdown
+	ctrlCloseFn()
+	apiServerCloseFn()
 }

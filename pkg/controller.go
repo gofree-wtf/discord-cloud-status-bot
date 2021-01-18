@@ -48,16 +48,16 @@ func NewBotController(token, commandPrefix, sessionLogLevel string) (*BotControl
 	return c, nil
 }
 
-func (c *BotController) Run() (closeFn func(), err error) {
+func (c *BotController) Run() (closeFn func()) {
 	stopCh := make(chan struct{}, 1)
 
 	go func() {
 		for {
-			Logger.Info().Msg("connect session")
+			Logger.Info().Msg("connect bot session")
 
 			err := c.session.Open()
 			if err != nil {
-				Logger.Error().Err(err).Msg("failed to connect session. retry connect session")
+				Logger.Error().Err(err).Msg("failed to connect bot session. retry connect session")
 				time.Sleep(sessionReconnectionPeriod)
 				continue
 			}
@@ -68,11 +68,11 @@ func (c *BotController) Run() (closeFn func(), err error) {
 	}()
 
 	return func() {
-		Logger.Info().Msg("waiting for close session")
+		Logger.Info().Msg("waiting for close bot session")
 
 		stopCh <- struct{}{}
 
-		defer Logger.Info().Msg("closed session")
+		defer Logger.Info().Msg("closed bot session")
 
 		if c.session == nil {
 			return
@@ -80,7 +80,7 @@ func (c *BotController) Run() (closeFn func(), err error) {
 
 		err := c.session.Close()
 		if err != nil {
-			Logger.Warn().Err(err).Msg("failed to close session")
+			Logger.Warn().Err(err).Msg("failed to close bot session")
 		}
-	}, nil
+	}
 }
