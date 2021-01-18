@@ -53,24 +53,15 @@ type Bot struct {
 }
 
 type Api struct {
-	Port                         uint16 `yaml:"port"                            env:"API_PORT"`
+	Port                         int    `yaml:"port"                            env:"API_PORT"`
 	SelfHealthcheckEnabled       bool   `yaml:"self_healthcheck_enabled"        env:"API_SELF_HEALTHCHECK_ENABLED"`
 	SelfHealthcheckUrl           string `yaml:"self_healthcheck_url"            env:"API_SELF_HEALTHCHECK_URL"`
-	SelfHealthcheckPeriodMinutes uint32 `yaml:"self_healthcheck_period_minutes" env:"API_SELF_HEALTHCHECK_PERIOD_MINUTES"`
+	SelfHealthcheckPeriodMinutes int    `yaml:"self_healthcheck_period_minutes" env:"API_SELF_HEALTHCHECK_PERIOD_MINUTES"`
 
-	HerokuHost string `env:"YOUR_HOST"`
-	HerokuPort uint16 `env:"PORT"`
+	HerokuPort int `env:"PORT"`
 }
 
-func (a Api) GetHost() string {
-	if a.HerokuHost != "" {
-		return a.HerokuHost
-	} else {
-		return "" // default values
-	}
-}
-
-func (a Api) GetPort() uint16 {
+func (a Api) GetPort() int {
 	if a.Port != 0 {
 		return a.Port
 	} else if a.HerokuPort != 0 {

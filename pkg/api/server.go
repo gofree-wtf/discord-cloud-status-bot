@@ -25,7 +25,7 @@ func NewApiServer() *ApiServer {
 	return &ApiServer{
 		router: r,
 		server: &http.Server{
-			Addr:    fmt.Sprintf("%s:%d", Config.Api.GetHost(), Config.Api.GetPort()),
+			Addr:    fmt.Sprintf(":%d", Config.Api.GetPort()),
 			Handler: r,
 		},
 	}
@@ -39,7 +39,7 @@ func (s *ApiServer) Run() (closeFn func()) {
 
 	go func() {
 		for running {
-			Logger.Info().Uint16("port", Config.Api.GetPort()).Msg("run api server")
+			Logger.Info().Int("port", Config.Api.GetPort()).Msg("run api server")
 
 			err := s.server.ListenAndServe()
 			if err == http.ErrServerClosed {
@@ -69,7 +69,7 @@ func (s *ApiServer) Run() (closeFn func()) {
 		go func() {
 			Logger.Info().
 				Str("selfHealthcheckUrl", Config.Api.SelfHealthcheckUrl).
-				Uint32("selfHealthcheckPeriodMinutes", Config.Api.SelfHealthcheckPeriodMinutes).
+				Int("selfHealthcheckPeriodMinutes", Config.Api.SelfHealthcheckPeriodMinutes).
 				Msg("start self healthcheck")
 
 			for range selfHealthcheckTicker.C {
