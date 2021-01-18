@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"github.com/gin-contrib/logger"
 	"github.com/gin-gonic/gin"
 	. "github.com/gofree-wtf/discord-cloud-status-bot/pkg/common"
 	"net/http"
@@ -13,8 +14,18 @@ type ApiServer struct {
 	server *http.Server
 }
 
+func init() {
+	gin.SetMode(gin.ReleaseMode)
+}
+
 func NewApiServer() *ApiServer {
-	r := gin.Default()
+	r := gin.New()
+	r.Use(
+		logger.SetLogger(logger.Config{
+			Logger: &Logger,
+		}),
+		gin.Recovery(),
+	)
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
