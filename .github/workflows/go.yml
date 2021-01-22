@@ -15,7 +15,7 @@ jobs:
       uses: actions/setup-go@v2
       with:
         go-version: 1.15
-    - name: test
+    - name: Go Test
       run: make test
-    - name: build
+    - name: Go Build
       run: make build
