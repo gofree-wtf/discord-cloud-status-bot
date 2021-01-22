@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"context"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	. "github.com/gofree-wtf/discord-cloud-status-bot/pkg/common"
@@ -20,11 +21,16 @@ func (c *BotController) handleMessage(session *discordgo.Session, createMsg *dis
 
 	inMsg := util.SubstringAfter(createMsg.Content, c.commandPrefix+" ")
 
-	logger := Logger.With().Str("inMsg", inMsg).Logger()
-	logger.Info().Msg("received message")
+	l := Logger.With().Str("inMsg", inMsg).Logger()
+	l.Info().Msg("received message")
 
+	var ctx = context.WithValue(context.Background(), CreateMessageKey, CreateMessage{
+		Session: session,
+		Message: createMsg,
+	})
 	var sendMsg string
-	outMsg, errMsg, err := c.command.Execute(inMsg)
+
+	outMsg, errMsg, err := c.command.ExecuteWithContext(ctx, inMsg)
 	if err != nil {
 		if errMsg != "" {
 			sendMsg = fmt.Sprintf("무언가 문제가 발생하였습니다.\n%s", errMsg)
@@ -36,16 +42,14 @@ func (c *BotController) handleMessage(session *discordgo.Session, createMsg *dis
 	}
 
 	if sendMsg == "" {
-		logger.Debug().Msg("empty send message")
 		return
 	}
-
-	logger = logger.With().Str("sendMsg", sendMsg).Logger()
+	l = l.With().Str("sendMsg", sendMsg).Logger()
 
 	_, err = session.ChannelMessageSend(createMsg.ChannelID, sendMsg)
 	if err != nil {
-		logger.Error().Err(err).Msg("failed to send message")
+		l.Error().Err(err).Msg("failed to send message")
 		return
 	}
-	logger.Info().Msg("success to send message")
+	l.Info().Msg("success to send message")
 }

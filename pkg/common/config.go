@@ -25,6 +25,7 @@ var Config = &_Config{
 	Bot: Bot{
 		CommandPrefix: DefaultBotCommandPrefix,
 		TimeZone:      "Asia/Seoul",
+		Location:      time.Local,
 	},
 	Api: Api{
 		SelfHealthcheckEnabled:       true,
