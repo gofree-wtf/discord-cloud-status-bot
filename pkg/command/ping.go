@@ -2,6 +2,7 @@ package command
 
 import (
 	"fmt"
+	. "github.com/gofree-wtf/discord-cloud-status-bot/pkg/common"
 	"github.com/spf13/cobra"
 	"strings"
 )
@@ -20,7 +21,26 @@ func pingCommand() *cobra.Command {
 			if len(args) > 0 {
 				outMsg = fmt.Sprintf("%s\nArgs: %s", outMsg, strings.Join(args, " "))
 			}
-			writeOutMsg(cmd, outMsg)
+			l := Logger.With().Str("outMsg", outMsg).Logger()
+
+			createMsgObj := cmd.Context().Value(CreateMessageKey)
+			if createMsgObj == nil {
+				writeOutMsg(cmd, outMsg)
+				return
+			}
+
+			createMsg, ok := createMsgObj.(CreateMessage)
+			if !ok {
+				l.Error().Interface("createMsgObj", createMsgObj).Msg("invalid message context")
+				return
+			}
+
+			_, err := createMsg.Session.ChannelMessageSend(createMsg.Message.ChannelID, outMsg)
+			if err != nil {
+				l.Error().Err(err).Msg("failed to send message")
+				return
+			}
+			l.Info().Msg("success to send message")
 		},
 	}
 }
