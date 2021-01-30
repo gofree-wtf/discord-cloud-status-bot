@@ -3,6 +3,7 @@ package common
 import (
 	"fmt"
 	"github.com/Netflix/go-env"
+	"github.com/bwmarrin/discordgo"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
@@ -43,6 +44,8 @@ type Log struct {
 	Level        string `yaml:"level"         env:"LOG_LEVEL"`
 	Format       string `yaml:"format"        env:"LOG_FORMAT"`
 	SessionLevel string `yaml:"session_level" env:"LOG_SESSION_LEVEL"`
+
+	SessionLogLevel int `json:"-"`
 }
 
 type Bot struct {
@@ -128,13 +131,25 @@ func setLogger() error {
 	switch Config.Log.Format {
 	case "console":
 		Logger = Logger.Output(zerolog.NewConsoleWriter())
-		return nil
 	case "json":
 		// use default json formatter
-		return nil
 	default:
 		return fmt.Errorf("invalid log.format: %s", Config.Log.Format)
 	}
+
+	switch strings.Trim(Config.Log.SessionLevel, " ") {
+	case "debug":
+		Config.Log.SessionLogLevel = discordgo.LogDebug
+	case "info":
+		Config.Log.SessionLogLevel = discordgo.LogInformational
+	case "", "warn":
+		Config.Log.SessionLogLevel = discordgo.LogWarning
+	case "error":
+		Config.Log.SessionLogLevel = discordgo.LogError
+	default:
+		return fmt.Errorf("invalid log.session_level: %s", Config.Log.SessionLevel)
+	}
+	return nil
 }
 
 func setBotValues() error {

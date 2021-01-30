@@ -36,7 +36,7 @@ func main() {
 	Logger.Info().Interface("config", Config).Msg("success to load config")
 
 	// run bot controller
-	ctrl, err := pkg.NewBotController(Config.Bot.Token, Config.Bot.CommandPrefix, Config.Log.SessionLevel)
+	ctrl, err := pkg.NewBotController(Config.Bot.Token, Config.Bot.CommandPrefix, Config.Log.SessionLogLevel)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to create controller")
 	}

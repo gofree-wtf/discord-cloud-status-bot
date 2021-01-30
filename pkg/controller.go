@@ -1,11 +1,9 @@
 package pkg
 
 import (
-	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/gofree-wtf/discord-cloud-status-bot/pkg/command"
 	. "github.com/gofree-wtf/discord-cloud-status-bot/pkg/common"
-	"strings"
 	"time"
 )
 
@@ -17,7 +15,7 @@ type BotController struct {
 	session       *discordgo.Session
 }
 
-func NewBotController(token, commandPrefix, sessionLogLevel string) (*BotController, error) {
+func NewBotController(token, commandPrefix string, sessionLogLevel int) (*BotController, error) {
 	c := &BotController{
 		commandPrefix: commandPrefix,
 		command:       command.NewBotCommand(commandPrefix),
@@ -28,23 +26,11 @@ func NewBotController(token, commandPrefix, sessionLogLevel string) (*BotControl
 		return nil, err
 	}
 
-	switch strings.Trim(sessionLogLevel, " ") {
-	case "debug":
-		session.LogLevel = discordgo.LogDebug
-	case "info":
-		session.LogLevel = discordgo.LogInformational
-	case "", "warn":
-		session.LogLevel = discordgo.LogWarning
-	case "error":
-		session.LogLevel = discordgo.LogError
-	default:
-		return nil, fmt.Errorf("invalid session log level: %s", sessionLogLevel)
-	}
-
-	session.AddHandler(c.handleMessage)
+	session.LogLevel = sessionLogLevel
 	session.Identify.Intents = discordgo.MakeIntent(discordgo.IntentsGuildMessages)
-	c.session = session
+	session.AddHandler(c.handleMessage)
 
+	c.session = session
 	return c, nil
 }
 
