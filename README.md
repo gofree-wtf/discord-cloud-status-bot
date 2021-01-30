@@ -29,7 +29,7 @@ Available Commands:
 
 ## Development
 
-- Go 1.15
+- Go 1.16rc1
 - Go modules
 
 

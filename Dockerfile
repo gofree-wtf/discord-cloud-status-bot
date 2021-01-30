@@ -1,4 +1,4 @@
-FROM golang:1.15
+FROM golang:1.16rc1
 LABEL maintainer="gofree.wtf@gmail.com"
 
 ENV LOG_LEVEL=info
